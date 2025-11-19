@@ -1820,7 +1820,7 @@
   resolved "https://registry.yarnpkg.com/@dhis2/ui-icons/-/ui-icons-10.9.2.tgz#f0f9a6383b3deeebd39f61e13e55dba3e578ac7f"
   integrity sha512-ssMLscci8xyjySti5doX9/Zq6PsLS+livX3umt8sIlm7jPFiCFN0J/Fde0rAGggnYxeNP6X+4ect03emyP6o6g==
 
-"@dhis2/ui@^10.7.8":
+"@dhis2/ui@^10.7.8", "@dhis2/ui@^10.9.2":
   version "10.9.2"
   resolved "https://registry.yarnpkg.com/@dhis2/ui/-/ui-10.9.2.tgz#7f79d3b35c46a8eccbee38779ce1e65c3bbc3e4c"
   integrity sha512-CFhrGBRGe201xjbxX3H/Wtv5Mds1HJqnyA4myPZ/Slanod8458TU19s9pnpI1UsJKPPyu/RLXOtmhV7CBdNBUg==
@@ -5028,6 +5028,11 @@ he@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
+
+highcharts@^12.4.0:
+  version "12.4.0"
+  resolved "https://registry.yarnpkg.com/highcharts/-/highcharts-12.4.0.tgz#6bc0d551960e4e275d5a605e77b75625deeea225"
+  integrity sha512-o6UxxfChSUrvrZUbWrAuqL1HO/+exhAUPcZY6nnqLsadZQlnP16d082sg7DnXKZCk1gtfkyfkp6g3qkIZ9miZg==
 
 html-encoding-sniffer@^2.0.1:
   version "2.0.1"
