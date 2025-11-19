@@ -30,7 +30,7 @@ const MyApp = () => {
       <Plugin
         dashboardItemId={"dashboarditem-1234"}
         dashboardItemFilters={[]}
-        dashboardMode={"view"}
+        dashboardMode={"edit"}
         setDashboardItemDetails={Function.prototype}
       />
     </div>
