@@ -2,8 +2,7 @@ import { useDataQuery } from "@dhis2/app-runtime";
 import i18n from "@dhis2/d2-i18n";
 import React from "react";
 import classes from "./App.module.css";
-import Plugin from "./Plugin.jsx";
-// './locales' will be populated after running start or build scripts
+import PluginWrapper from "./PluginWrapper.jsx";
 import "./locales";
 
 const query = {

@@ -1,23 +1,18 @@
 import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import ViewChart from "./ViewChart.jsx";
+import EditChart from "./EditChart.jsx";
 
-const DashboardPlugin = ({
-  dashboardItemId,
-  dashboardItemFilters,
-  dashboardMode,
-  setDashboardItemDetails,
-}) => {
+const DashboardPlugin = (props) => {
   
-  if (dashboardMode === "view") {
+  if (props.dashboardMode === "view") {
     return (
-      <ViewChart 
-      dashboardItemId={dashboardItemId} dashboardItemFilters={dashboardItemFilters}/>
+      <ViewChart {...props}/>
     );
   }
 
-  if (dashboardMode === "edit") {
-    return <div>Dashboard Plugin - Edit Mode (not implemented)</div>;
+  if (props.dashboardMode === "edit") {
+    return <EditChart {...props} />;
   }
 
   return <div>Dashboard Plugin - Unknown Mode</div>;

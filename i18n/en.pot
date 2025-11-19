@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-19T12:48:40.510Z\n"
-"PO-Revision-Date: 2025-11-19T12:48:40.510Z\n"
+"POT-Creation-Date: 2025-11-19T13:47:30.049Z\n"
+"PO-Revision-Date: 2025-11-19T13:47:30.049Z\n"
 
 msgid "ERROR"
 msgstr "ERROR"
@@ -16,11 +16,3 @@ msgstr "Loading..."
 
 msgid "Hello {{name}}"
 msgstr "Hello {{name}}"
-
-msgctxt "Application title"
-msgid "__MANIFEST_APP_TITLE"
-msgstr "prediction-visualizer"
-
-msgctxt "Application description"
-msgid "__MANIFEST_APP_DESCRIPTION"
-msgstr ""
