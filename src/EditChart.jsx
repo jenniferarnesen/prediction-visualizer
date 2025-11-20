@@ -2,6 +2,7 @@ import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import { Radio, TabBar, Tab, Button } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import DataSelector from "./DataSelector.jsx";
+import OrgUnitSelector from "./OrgUnitSelector/index.ts";
 
 const dashboardItemsQuery = {
   dashboardItems: {
@@ -18,6 +19,8 @@ const EditChart = (props) => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [activeTab, setActiveTab] = useState("data");
+  const [orgUnits, setOrgUnits] = useState([]);
+  const [orgUnitLevel, setOrgUnitLevel] = useState(undefined);
 
   const engine = useDataEngine();
   const {
@@ -32,12 +35,15 @@ const EditChart = (props) => {
       const savedConfig =
         dashboardItemsData.dashboardItems[props.dashboardItemId];
       if (savedConfig) {
+        console.log("jj savedConfig:", savedConfig);
         setChartType(savedConfig.chartType || "custom");
         if (savedConfig.chartType === "custom") {
           setHistoricData(savedConfig.historicData || "");
           setPredictionMedian(savedConfig.predictionMedian || "");
           setPredictionHigh(savedConfig.predictionHigh || "");
           setPredictionLow(savedConfig.predictionLow || "");
+          setOrgUnits(savedConfig.orgUnits || []);
+          setOrgUnitLevel(savedConfig.orgUnitLevel || undefined);
         }
       }
     }
@@ -59,6 +65,11 @@ const EditChart = (props) => {
         itemConfig.predictionMedian = predictionMedian;
         itemConfig.predictionHigh = predictionHigh;
         itemConfig.predictionLow = predictionLow;
+        itemConfig.orgUnits = orgUnits.map((ou) => ({
+          id: ou.id,
+          path: ou.path,
+        }));
+        itemConfig.orgUnitLevel = orgUnitLevel?.id;
       }
 
       let existingDashboardItems = {};
@@ -111,11 +122,18 @@ const EditChart = (props) => {
     }
   };
 
-  return (
-    <div>
-      <p>Configure chart</p>
+  console.log("activeTab:", activeTab);
 
-      <div>
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        gap: "16px",
+      }}
+    >
+      <div style={{ display: "flex", gap: "16px" }}>
         <Radio
           label="Set up custom chart"
           value="custom"
@@ -131,7 +149,7 @@ const EditChart = (props) => {
       </div>
 
       {chartType === "custom" && (
-        <>
+        <div style={{ flex: 1, overflow: "auto" }}>
           <TabBar>
             <Tab
               selected={activeTab === "data"}
@@ -161,22 +179,27 @@ const EditChart = (props) => {
           )}
 
           {activeTab === "orgunit" && (
-            <div>
-              <p>Organisation unit selector placeholder</p>
-            </div>
+            <OrgUnitSelector
+              orgUnits={orgUnits}
+              setOrgUnits={setOrgUnits}
+              orgUnitLevel={orgUnitLevel}
+              setOrgUnitLevel={setOrgUnitLevel}
+            />
           )}
-        </>
+        </div>
       )}
 
-      <Button
-        onClick={saveConfigToDataStore}
-        disabled={saveLoading || dashboardItemsLoading}
-      >
-        {saveLoading ? "Saving..." : "Save configuration"}
-      </Button>
-      {saveError && (
-        <div style={{ color: "red" }}>Save Error: {saveError.message}</div>
-      )}
+      <div>
+        <Button
+          onClick={saveConfigToDataStore}
+          disabled={saveLoading || dashboardItemsLoading}
+        >
+          {saveLoading ? "Saving..." : "Save configuration"}
+        </Button>
+        {saveError && (
+          <div style={{ color: "red" }}>Save Error: {saveError.message}</div>
+        )}
+      </div>
     </div>
   );
 };

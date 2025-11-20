@@ -40,15 +40,22 @@ const getPrevious12ToNext12Months = () => {
   return months;
 };
 
-const getAnalyticsQuery = (historicDataId) => {
+const getAnalyticsQuery = (historicDataId, orgUnits, orgUnitLevel) => {
   const periods = getPrevious18Months();
 
+  // Build org unit filter
+  let ouFilter;
+  if (orgUnitLevel) {
+    ouFilter = `ou:LEVEL-${orgUnitLevel}`;
+  } else if (orgUnits && orgUnits.length > 0) {
+    ouFilter = `ou:${orgUnits.join(";")}`;
+  }
   return {
     historicData: {
       resource: "analytics",
       params: {
         dimension: `dx:${historicDataId},pe:${periods.join(";")}`,
-        filter: "ou:LEVEL-2",
+        filter: ouFilter,
       },
     },
   };
@@ -57,7 +64,9 @@ const getAnalyticsQuery = (historicDataId) => {
 const getPredictionQuery = (
   predictionMedianId,
   predictionHighId,
-  predictionLowId
+  predictionLowId,
+  orgUnits,
+  orgUnitLevel
 ) => {
   const periods = getPrevious12ToNext12Months();
   const dataElements = [
@@ -66,12 +75,20 @@ const getPredictionQuery = (
     predictionLowId,
   ].filter(Boolean);
 
+  // Build org unit filter
+  let ouFilter = "ou:LEVEL-2"; // default
+  if (orgUnitLevel) {
+    ouFilter = `ou:LEVEL-${orgUnitLevel}`;
+  } else if (orgUnits && orgUnits.length > 0) {
+    ouFilter = `ou:${orgUnits.join(";")}`;
+  }
+
   return {
     predictionData: {
       resource: "analytics",
       params: {
         dimension: `dx:${dataElements.join(";")},pe:${periods.join(";")}`,
-        filter: "ou:LEVEL-2",
+        filter: ouFilter,
       },
     },
   };
@@ -92,6 +109,8 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
   const predictionMedianId = config?.predictionMedian;
   const predictionHighId = config?.predictionHigh;
   const predictionLowId = config?.predictionLow;
+  const orgUnits = config?.orgUnits;
+  const orgUnitLevel = config?.orgUnitLevel;
 
   console.log("ViewChart config:", {
     config,
@@ -110,7 +129,7 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
         try {
           // Fetch historic data
           const historicResult = await engine.query(
-            getAnalyticsQuery(historicDataId)
+            getAnalyticsQuery(historicDataId, orgUnits, orgUnitLevel)
           );
           setAnalyticsData(historicResult);
 
@@ -120,7 +139,9 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
               getPredictionQuery(
                 predictionMedianId,
                 predictionHighId,
-                predictionLowId
+                predictionLowId,
+                orgUnits,
+                orgUnitLevel
               )
             );
             setPredictionData(predictionResult);

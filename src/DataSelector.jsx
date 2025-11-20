@@ -27,11 +27,12 @@ const DataSelector = ({
   return (
     <div>
       <h3>Data Selection</h3>
-      
+
       <SingleSelectField
         label="Historic data"
         selected={historicData}
         onChange={({ selected }) => setHistoricData(selected)}
+        filterable
       >
         {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
@@ -46,6 +47,7 @@ const DataSelector = ({
         label="Prediction median"
         selected={predictionMedian}
         onChange={({ selected }) => setPredictionMedian(selected)}
+        filterable
       >
         {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
@@ -60,6 +62,7 @@ const DataSelector = ({
         label="Prediction high"
         selected={predictionHigh}
         onChange={({ selected }) => setPredictionHigh(selected)}
+        filterable
       >
         {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
@@ -74,6 +77,7 @@ const DataSelector = ({
         label="Prediction low"
         selected={predictionLow}
         onChange={({ selected }) => setPredictionLow(selected)}
+        filterable
       >
         {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
