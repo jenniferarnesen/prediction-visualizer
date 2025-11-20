@@ -1,16 +1,17 @@
 import React, { useEffect, useRef } from "react";
+import { useDataQuery } from "@dhis2/app-runtime";
 import Highcharts from "highcharts";
 import "highcharts/modules/data";
 import "highcharts/highcharts-more";
 // import csvData from './malaria-deaths-predictions.csv?raw';
 
-const ViewChart = ({
-    dashboardItemId,
-    dashboardItemFilters,
-  }) => {
-    const chartRef = useRef(null);
+const dashboardItemsQuery = {
+  dashboardItems: {
+    resource: 'dataStore/PREDICTION_VISUALIZER_PLUGIN/dashboardItems',
+  },
+};
 
-  const actualDeaths = [
+const actualDeaths = [
     [Date.UTC(2024, 0, 1), 39],
     [Date.UTC(2024, 1, 1), 28],
     [Date.UTC(2024, 2, 1), 22],
@@ -28,13 +29,18 @@ const ViewChart = ({
     // [Date.UTC(2025, 2, 1), 13],
   ];
 
-  console.log("jj DashboardPlugin rendered with props:", {
+const ViewChart = ({
     dashboardItemId,
     dashboardItemFilters,
-  });
+  }) => {
+    const chartRef = useRef(null);
+    const { loading, error, data } = useDataQuery(dashboardItemsQuery);
 
   useEffect(() => {
-    if (chartRef.current) {
+    const config = data?.dashboardItems?.[dashboardItemId];
+    const chartType = config?.chartType;
+
+    if (chartRef.current && chartType === 'example') {
       Highcharts.chart(chartRef.current, {
         chart: {
           height: null,
@@ -135,7 +141,26 @@ const ViewChart = ({
         ],
       });
     }
-  }, []);
+  }, [data, dashboardItemId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading chart configuration: {error.message}</div>;
+  }
+
+  const config = data?.dashboardItems?.[dashboardItemId];
+  const chartType = config?.chartType;
+
+  if (!config) {
+    return <div>No configuration found for this chart. Please configure it in edit mode.</div>;
+  }
+
+  if (chartType === 'custom') {
+    return <div>Custom chart visualization coming soon...</div>;
+  }
 
   // TODO - figure out how to make the chart the full height of the dashboard item
   return <div ref={chartRef} style={{ width: "100%", height: "400px" }} />;

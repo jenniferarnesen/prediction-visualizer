@@ -4,11 +4,15 @@ import ViewChart from "./ViewChart.jsx";
 import EditChart from "./EditChart.jsx";
 
 const DashboardPlugin = (props) => {
-  
+  props.setDashboardItemDetails &&
+    props.setDashboardItemDetails({
+      itemTitle: `Chart for ${props.dashboardItemId}`,
+      onRemove: () =>
+        console.log(`Dashboard item ${props.dashboardItemId} removed`), // TODO cant actually remove yet unitl confirm save in dashboard
+    });
+
   if (props.dashboardMode === "view") {
-    return (
-      <ViewChart {...props}/>
-    );
+    return <ViewChart {...props} />;
   }
 
   if (props.dashboardMode === "edit") {
