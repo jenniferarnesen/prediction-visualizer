@@ -3,7 +3,7 @@ import Highcharts from "highcharts";
 import "highcharts/modules/data";
 import "highcharts/highcharts-more";
 
-const CustomChart = ({ analyticsData }) => {
+const CustomChart = ({ analyticsData, predictionMedianData }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -11,7 +11,7 @@ const CustomChart = ({ analyticsData }) => {
       return;
     }
 
-    // Transform analytics data into Highcharts format
+    // Transform historic analytics data into Highcharts format
     const rows = analyticsData.historicData.rows || [];
     const headers = analyticsData.historicData.headers || [];
 
@@ -32,6 +32,58 @@ const CustomChart = ({ analyticsData }) => {
         return [Date.UTC(year, month, 1), value];
       })
       .sort((a, b) => a[0] - b[0]); // Sort by timestamp
+
+    // Transform prediction median data if available
+    let predictionChartData = [];
+    if (predictionMedianData?.predictionMedian) {
+      const predRows = predictionMedianData.predictionMedian.rows || [];
+      const predHeaders = predictionMedianData.predictionMedian.headers || [];
+
+      const predPeIndex = predHeaders.findIndex((h) => h.name === "pe");
+      const predValueIndex = predHeaders.findIndex((h) => h.name === "value");
+
+      predictionChartData = predRows
+        .map((row) => {
+          const period = row[predPeIndex];
+          const value = parseFloat(row[predValueIndex]);
+
+          const year = parseInt(period.substring(0, 4));
+          const month = parseInt(period.substring(4, 6)) - 1;
+
+          return [Date.UTC(year, month, 1), value];
+        })
+        .sort((a, b) => a[0] - b[0]);
+    }
+
+    // Build series array
+    const series = [
+      {
+        name: "Historical Data",
+        type: "line",
+        data: chartData,
+        color: "#dc2626",
+        lineWidth: 2,
+        marker: {
+          enabled: true,
+          radius: 3,
+        },
+      },
+    ];
+
+    // Add prediction median series if data is available
+    if (predictionChartData.length > 0) {
+      series.push({
+        name: "Prediction Median",
+        type: "line",
+        data: predictionChartData,
+        color: "#1e40af",
+        lineWidth: 2,
+        marker: {
+          enabled: true,
+          radius: 4,
+        },
+      });
+    }
 
     Highcharts.chart(chartRef.current, {
       chart: {
@@ -60,21 +112,9 @@ const CustomChart = ({ analyticsData }) => {
       legend: {
         enabled: true,
       },
-      series: [
-        {
-          name: "Historical Data",
-          type: "line",
-          data: chartData,
-          color: "#dc2626",
-          lineWidth: 2,
-          marker: {
-            enabled: true,
-            radius: 3,
-          },
-        },
-      ],
+      series: series,
     });
-  }, [analyticsData]);
+  }, [analyticsData, predictionMedianData]);
 
   return <div ref={chartRef} style={{ width: "100%", height: "400px" }} />;
 };
