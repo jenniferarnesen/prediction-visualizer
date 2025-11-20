@@ -54,14 +54,23 @@ const getAnalyticsQuery = (historicDataId) => {
   };
 };
 
-const getPredictionMedianQuery = (predictionMedianId) => {
+const getPredictionQuery = (
+  predictionMedianId,
+  predictionHighId,
+  predictionLowId
+) => {
   const periods = getPrevious12ToNext12Months();
+  const dataElements = [
+    predictionMedianId,
+    predictionHighId,
+    predictionLowId,
+  ].filter(Boolean);
 
   return {
-    predictionMedian: {
+    predictionData: {
       resource: "analytics",
       params: {
-        dimension: `dx:${predictionMedianId},pe:${periods.join(";")}`,
+        dimension: `dx:${dataElements.join(";")},pe:${periods.join(";")}`,
         filter: "ou:LEVEL-2",
       },
     },
@@ -74,19 +83,23 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState(null);
-  const [predictionMedianData, setPredictionMedianData] = useState(null);
+  const [predictionData, setPredictionData] = useState(null);
 
   // Get config to determine if we need to fetch analytics data
   const config = data?.dashboardItems?.[dashboardItemId];
   const chartType = config?.chartType;
   const historicDataId = config?.historicData;
   const predictionMedianId = config?.predictionMedian;
+  const predictionHighId = config?.predictionHigh;
+  const predictionLowId = config?.predictionLow;
 
   console.log("ViewChart config:", {
     config,
     chartType,
     historicDataId,
     predictionMedianId,
+    predictionHighId,
+    predictionLowId,
   });
 
   useEffect(() => {
@@ -101,12 +114,16 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
           );
           setAnalyticsData(historicResult);
 
-          // Fetch prediction median data if configured
-          if (predictionMedianId) {
+          // Fetch prediction data if any prediction data element is configured
+          if (predictionMedianId || predictionHighId || predictionLowId) {
             const predictionResult = await engine.query(
-              getPredictionMedianQuery(predictionMedianId)
+              getPredictionQuery(
+                predictionMedianId,
+                predictionHighId,
+                predictionLowId
+              )
             );
-            setPredictionMedianData(predictionResult);
+            setPredictionData(predictionResult);
           }
         } catch (err) {
           setAnalyticsError(err);
@@ -117,7 +134,15 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
     };
 
     fetchAnalytics();
-  }, [loading, chartType, historicDataId, predictionMedianId, engine]);
+  }, [
+    loading,
+    chartType,
+    historicDataId,
+    predictionMedianId,
+    predictionHighId,
+    predictionLowId,
+    engine,
+  ]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -149,11 +174,14 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
     }
 
     console.log("Analytics data:", analyticsData);
-    console.log("Prediction median data:", predictionMedianData);
+    console.log("Prediction data:", predictionData);
     return (
       <CustomChart
         analyticsData={analyticsData}
-        predictionMedianData={predictionMedianData}
+        predictionData={predictionData}
+        predictionMedianId={predictionMedianId}
+        predictionHighId={predictionHighId}
+        predictionLowId={predictionLowId}
       />
     );
   }

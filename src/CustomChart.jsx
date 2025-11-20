@@ -3,7 +3,13 @@ import Highcharts from "highcharts";
 import "highcharts/modules/data";
 import "highcharts/highcharts-more";
 
-const CustomChart = ({ analyticsData, predictionMedianData }) => {
+const CustomChart = ({
+  analyticsData,
+  predictionData,
+  predictionMedianId,
+  predictionHighId,
+  predictionLowId,
+}) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -33,16 +39,21 @@ const CustomChart = ({ analyticsData, predictionMedianData }) => {
       })
       .sort((a, b) => a[0] - b[0]); // Sort by timestamp
 
-    // Transform prediction median data if available
-    let predictionChartData = [];
-    if (predictionMedianData?.predictionMedian) {
-      const predRows = predictionMedianData.predictionMedian.rows || [];
-      const predHeaders = predictionMedianData.predictionMedian.headers || [];
+    // Helper function to filter and transform prediction data by data element ID
+    const getPredictionSeriesData = (dataElementId) => {
+      if (!predictionData?.predictionData || !dataElementId) {
+        return [];
+      }
+
+      const predRows = predictionData.predictionData.rows || [];
+      const predHeaders = predictionData.predictionData.headers || [];
 
       const predPeIndex = predHeaders.findIndex((h) => h.name === "pe");
+      const predDxIndex = predHeaders.findIndex((h) => h.name === "dx");
       const predValueIndex = predHeaders.findIndex((h) => h.name === "value");
 
-      predictionChartData = predRows
+      return predRows
+        .filter((row) => row[predDxIndex] === dataElementId)
         .map((row) => {
           const period = row[predPeIndex];
           const value = parseFloat(row[predValueIndex]);
@@ -53,6 +64,28 @@ const CustomChart = ({ analyticsData, predictionMedianData }) => {
           return [Date.UTC(year, month, 1), value];
         })
         .sort((a, b) => a[0] - b[0]);
+    };
+
+    // Get data for each prediction series
+    const medianData = getPredictionSeriesData(predictionMedianId);
+    const highData = getPredictionSeriesData(predictionHighId);
+    const lowData = getPredictionSeriesData(predictionLowId);
+
+    // Combine high and low data into arearange format
+    const areaRangeData = [];
+    if (highData.length > 0 && lowData.length > 0) {
+      // Create a map of low values by timestamp for easy lookup
+      const lowMap = new Map(
+        lowData.map(([timestamp, value]) => [timestamp, value])
+      );
+
+      // Combine high and low values for matching timestamps
+      highData.forEach(([timestamp, highValue]) => {
+        const lowValue = lowMap.get(timestamp);
+        if (lowValue !== undefined) {
+          areaRangeData.push([timestamp, lowValue, highValue]);
+        }
+      });
     }
 
     // Build series array
@@ -67,21 +100,39 @@ const CustomChart = ({ analyticsData, predictionMedianData }) => {
           enabled: true,
           radius: 3,
         },
+        zIndex: 2,
       },
     ];
 
+    // Add arearange for prediction high/low if data is available
+    if (areaRangeData.length > 0) {
+      series.push({
+        name: "Prediction Range (Low-High)",
+        type: "arearange",
+        data: areaRangeData,
+        color: "rgba(100, 149, 237, 0.3)",
+        fillOpacity: 0.3,
+        lineWidth: 0,
+        marker: {
+          enabled: false,
+        },
+        zIndex: 0,
+      });
+    }
+
     // Add prediction median series if data is available
-    if (predictionChartData.length > 0) {
+    if (medianData.length > 0) {
       series.push({
         name: "Prediction Median",
         type: "line",
-        data: predictionChartData,
+        data: medianData,
         color: "#1e40af",
         lineWidth: 2,
         marker: {
           enabled: true,
           radius: 4,
         },
+        zIndex: 1,
       });
     }
 
@@ -114,7 +165,13 @@ const CustomChart = ({ analyticsData, predictionMedianData }) => {
       },
       series: series,
     });
-  }, [analyticsData, predictionMedianData]);
+  }, [
+    analyticsData,
+    predictionData,
+    predictionMedianId,
+    predictionHighId,
+    predictionLowId,
+  ]);
 
   return <div ref={chartRef} style={{ width: "100%", height: "400px" }} />;
 };
