@@ -26,7 +26,7 @@ const MyApp = () => {
   return (
     <div className={classes.container}>
       <h1>{i18n.t("Hello {{name}}", { name: data.me.name })}</h1>
-      <Plugin
+      <PluginWrapper
         dashboardItemId={"dashboarditem-1234"}
         dashboardItemFilters={[]}
         dashboardMode={"edit"}
