@@ -1,20 +1,11 @@
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
-import { Radio, SingleSelectField, SingleSelectOption } from "@dhis2/ui";
+import { Radio, TabBar, Tab, Button } from "@dhis2/ui";
 import { useState, useEffect } from "react";
+import DataSelector from "./DataSelector.jsx";
 
 const dashboardItemsQuery = {
   dashboardItems: {
     resource: "dataStore/PREDICTION_VISUALIZER_PLUGIN/dashboardItems",
-  },
-};
-
-const dataElementsQuery = {
-  dataElements: {
-    resource: "dataElements",
-    params: {
-      fields: "id,displayName",
-      paging: false,
-    },
   },
 };
 
@@ -26,6 +17,7 @@ const EditChart = (props) => {
   const [predictionLow, setPredictionLow] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [activeTab, setActiveTab] = useState("data");
 
   const engine = useDataEngine();
   const {
@@ -33,11 +25,6 @@ const EditChart = (props) => {
     // error: dashboardItemsError,
     data: dashboardItemsData,
   } = useDataQuery(dashboardItemsQuery);
-  const {
-    // loading: dataElementsLoading,
-    error: dataElementsError,
-    data: dataElementsData,
-  } = useDataQuery(dataElementsQuery);
 
   // Load saved configuration when data is available
   useEffect(() => {
@@ -144,76 +131,49 @@ const EditChart = (props) => {
       </div>
 
       {chartType === "custom" && (
-        <div>
-          <SingleSelectField
-            label="Historic data"
-            selected={historicData}
-            onChange={({ selected }) => setHistoricData(selected)}
-          >
-            {dataElementsData?.dataElements?.dataElements?.map((de) => (
-              <SingleSelectOption
-                key={de.id}
-                label={de.displayName}
-                value={de.id}
-              />
-            ))}
-          </SingleSelectField>
+        <>
+          <TabBar>
+            <Tab
+              selected={activeTab === "data"}
+              onClick={() => setActiveTab("data")}
+            >
+              Data
+            </Tab>
+            <Tab
+              selected={activeTab === "orgunit"}
+              onClick={() => setActiveTab("orgunit")}
+            >
+              Org units
+            </Tab>
+          </TabBar>
 
-          <SingleSelectField
-            label="Prediction median"
-            selected={predictionMedian}
-            onChange={({ selected }) => setPredictionMedian(selected)}
-          >
-            {dataElementsData?.dataElements?.dataElements?.map((de) => (
-              <SingleSelectOption
-                key={de.id}
-                label={de.displayName}
-                value={de.id}
-              />
-            ))}
-          </SingleSelectField>
+          {activeTab === "data" && (
+            <DataSelector
+              historicData={historicData}
+              setHistoricData={setHistoricData}
+              predictionMedian={predictionMedian}
+              setPredictionMedian={setPredictionMedian}
+              predictionHigh={predictionHigh}
+              setPredictionHigh={setPredictionHigh}
+              predictionLow={predictionLow}
+              setPredictionLow={setPredictionLow}
+            />
+          )}
 
-          <SingleSelectField
-            label="Prediction high"
-            selected={predictionHigh}
-            onChange={({ selected }) => setPredictionHigh(selected)}
-          >
-            {dataElementsData?.dataElements?.dataElements?.map((de) => (
-              <SingleSelectOption
-                key={de.id}
-                label={de.displayName}
-                value={de.id}
-              />
-            ))}
-          </SingleSelectField>
-
-          <SingleSelectField
-            label="Prediction low"
-            selected={predictionLow}
-            onChange={({ selected }) => setPredictionLow(selected)}
-          >
-            {dataElementsData?.dataElements?.dataElements?.map((de) => (
-              <SingleSelectOption
-                key={de.id}
-                label={de.displayName}
-                value={de.id}
-              />
-            ))}
-          </SingleSelectField>
-        </div>
+          {activeTab === "orgunit" && (
+            <div>
+              <p>Organisation unit selector placeholder</p>
+            </div>
+          )}
+        </>
       )}
 
-      <button
+      <Button
         onClick={saveConfigToDataStore}
         disabled={saveLoading || dashboardItemsLoading}
       >
-        {saveLoading ? "Saving..." : "Save to DataStore"}
-      </button>
-      {dataElementsError && (
-        <div style={{ color: "red" }}>
-          Data Elements Error: {dataElementsError.message}
-        </div>
-      )}
+        {saveLoading ? "Saving..." : "Save configuration"}
+      </Button>
       {saveError && (
         <div style={{ color: "red" }}>Save Error: {saveError.message}</div>
       )}
