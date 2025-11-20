@@ -20,6 +20,17 @@ const CustomChart = ({
     // Transform historic analytics data into Highcharts format
     const rows = analyticsData.historicData.rows || [];
     const headers = analyticsData.historicData.headers || [];
+    const metaData = analyticsData.historicData.metaData || {};
+
+    // Get the historic data element name from metadata
+    const historicDataName =
+      metaData.items?.[
+        Object.keys(metaData.items || {}).find((key) =>
+          metaData.dimensions?.dx?.includes(key)
+        )
+      ]?.name || "Historical Data";
+
+    const chartTitle = `${historicDataName} and predictions`;
 
     // Find the indices for period and value
     const peIndex = headers.findIndex((h) => h.name === "pe");
@@ -91,7 +102,7 @@ const CustomChart = ({
     // Build series array
     const series = [
       {
-        name: "Historical Data",
+        name: historicDataName,
         type: "line",
         data: chartData,
         color: "#dc2626",
@@ -144,7 +155,7 @@ const CustomChart = ({
         },
       },
       title: {
-        text: "Historical Data",
+        text: chartTitle,
         align: "left",
       },
       xAxis: {
