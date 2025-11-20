@@ -126,11 +126,14 @@ const EditChart = (props) => {
 
   return (
     <div
+      className="edit-chart-container"
       style={{
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        gap: "16px",
+        gap: "8px",
+        paddingBlockEnd: "8px",
+        marginInline: "8px",
       }}
     >
       <div style={{ display: "flex", gap: "16px" }}>
@@ -149,7 +152,10 @@ const EditChart = (props) => {
       </div>
 
       {chartType === "custom" && (
-        <div style={{ flex: 1, overflow: "auto" }}>
+        <div
+          className="custom-configurator"
+          style={{ flex: 1, overflow: "auto" }}
+        >
           <TabBar>
             <Tab
               selected={activeTab === "data"}
@@ -188,6 +194,8 @@ const EditChart = (props) => {
           )}
         </div>
       )}
+
+      {chartType !== "custom" && <div style={{ flex: 1 }} />}
 
       <div>
         <Button
