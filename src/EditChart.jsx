@@ -24,6 +24,15 @@ const EditChart = (props) => {
   const [orgUnitLevel, setOrgUnitLevel] = useState(undefined);
   const [periodType, setPeriodType] = useState("weekly");
 
+  // Set dashboard item title for edit mode
+  useEffect(() => {
+    if (props.setDashboardItemDetails) {
+      props.setDashboardItemDetails({
+        itemTitle: "Prediction",
+      });
+    }
+  }, [props]);
+
   const engine = useDataEngine();
   const {
     loading: dashboardItemsLoading,
@@ -37,7 +46,6 @@ const EditChart = (props) => {
       const savedConfig =
         dashboardItemsData.dashboardItems[props.dashboardItemId];
       if (savedConfig) {
-        console.log("jj savedConfig:", savedConfig);
         setChartType(savedConfig.chartType || "custom");
         if (savedConfig.chartType === "custom") {
           setHistoricData(savedConfig.historicData || "");

@@ -1,6 +1,7 @@
 import React from "react";
 import { useDataQuery, useDataEngine } from "@dhis2/app-runtime";
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import ExampleChart from "./ExampleChart.jsx";
 import CustomChart from "./CustomChart.jsx";
 
@@ -40,16 +41,68 @@ const getPrevious12ToNext12Months = () => {
   return months;
 };
 
+// Helper function to get ISO week number
+const getISOWeek = (date) => {
+  const target = new Date(date.valueOf());
+  const dayNr = (date.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - target) / 604800000);
+};
+
+// Helper function to get the previous 18 months worth of weeks (~78 weeks) in YYYYWWW format
+const getPrevious18MonthsWeeks = () => {
+  const weeks = [];
+  const now = new Date();
+
+  // Calculate approximately 78 weeks back (18 months * 4.33 weeks/month)
+  for (let i = 77; i >= 0; i--) {
+    const date = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+    const year = date.getFullYear();
+    const week = getISOWeek(date);
+    weeks.push(`${year}W${String(week).padStart(2, "0")}`);
+  }
+
+  // Remove duplicates while maintaining order
+  return [...new Set(weeks)];
+};
+
+// Helper function to get previous 12 to next 12 months worth of weeks (~104 weeks) in YYYYWWW format
+const getPrevious12ToNext12MonthsWeeks = () => {
+  const weeks = [];
+  const now = new Date();
+
+  // Calculate approximately 52 weeks back and 52 weeks forward (12 months * 4.33 weeks/month)
+  for (let i = -52; i <= 52; i++) {
+    const date = new Date(now.getTime() + i * 7 * 24 * 60 * 60 * 1000);
+    const year = date.getFullYear();
+    const week = getISOWeek(date);
+    weeks.push(`${year}W${String(week).padStart(2, "0")}`);
+  }
+
+  // Remove duplicates while maintaining order
+  return [...new Set(weeks)];
+};
+
 const getAnalyticsQuery = (historicDataId, orgUnits, orgUnitLevel) => {
   const periods = getPrevious18Months();
 
-  // Build org unit filter
-  let ouFilter;
+  // Build org unit filter - can combine level and individual org units
+  const ouFilters = [];
   if (orgUnitLevel) {
-    ouFilter = `ou:LEVEL-${orgUnitLevel}`;
-  } else if (orgUnits && orgUnits.length > 0) {
-    ouFilter = `ou:${orgUnits.join(";")}`;
+    ouFilters.push(`LEVEL-${orgUnitLevel}`);
   }
+  if (orgUnits && orgUnits.length > 0) {
+    ouFilters.push(...orgUnits.map((ou) => ou.id));
+  }
+  // Default to LEVEL-2 if nothing specified
+  const ouFilter =
+    ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
+
   return {
     historicData: {
       resource: "analytics",
@@ -68,6 +121,7 @@ const getPredictionQuery = (
   orgUnits,
   orgUnitLevel
 ) => {
+  console.log("jj aa", { orgUnits, orgUnitLevel });
   const periods = getPrevious12ToNext12Months();
   const dataElements = [
     predictionMedianId,
@@ -75,13 +129,21 @@ const getPredictionQuery = (
     predictionLowId,
   ].filter(Boolean);
 
-  // Build org unit filter
-  let ouFilter = "ou:LEVEL-2"; // default
+  // Build org unit filter - can combine level and individual org units
+  const ouFilters = [];
   if (orgUnitLevel) {
-    ouFilter = `ou:LEVEL-${orgUnitLevel}`;
-  } else if (orgUnits && orgUnits.length > 0) {
-    ouFilter = `ou:${orgUnits.join(";")}`;
+    ouFilters.push(`LEVEL-${orgUnitLevel}`);
   }
+  // console.log("jj orgUnits in getPredictionQuery:", orgUnits);
+  if (orgUnits && orgUnits.length > 0) {
+    ouFilters.push(...orgUnits.map((ou) => ou.id));
+  }
+  // console.log("jj ouFilters in getPredictionQuery:", ouFilters);
+  // Default to LEVEL-2 if nothing specified
+  const ouFilter =
+    ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
+
+  console.log("jj ouFilter", ouFilter);
 
   return {
     predictionData: {
@@ -94,13 +156,16 @@ const getPredictionQuery = (
   };
 };
 
-const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
+const ViewChart = (props) => {
+  const { dashboardItemId, dashboardItemFilters, setDashboardItemDetails } =
+    props;
   const { loading, error, data } = useDataQuery(dashboardItemsQuery);
   const engine = useDataEngine();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsError, setAnalyticsError] = useState(null);
   const [predictionData, setPredictionData] = useState(null);
+  const [historicDataName, setHistoricDataName] = useState(null);
 
   // Get config to determine if we need to fetch analytics data
   const config = data?.dashboardItems?.[dashboardItemId];
@@ -112,14 +177,14 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
   const orgUnits = config?.orgUnits;
   const orgUnitLevel = config?.orgUnitLevel;
 
-  console.log("ViewChart config:", {
-    config,
-    chartType,
-    historicDataId,
-    predictionMedianId,
-    predictionHighId,
-    predictionLowId,
-  });
+  // console.log("ViewChart config:", {
+  //   config,
+  //   chartType,
+  //   historicDataId,
+  //   predictionMedianId,
+  //   predictionHighId,
+  //   predictionLowId,
+  // });
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -132,6 +197,16 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
             getAnalyticsQuery(historicDataId, orgUnits, orgUnitLevel)
           );
           setAnalyticsData(historicResult);
+
+          // Extract and set the display name from analytics metadata
+          const metaData = historicResult?.historicData?.metaData || {};
+          const displayName =
+            metaData.items?.[
+              Object.keys(metaData.items || {}).find((key) =>
+                metaData.dimensions?.dx?.includes(key)
+              )
+            ]?.name || "Historical Data";
+          setHistoricDataName(displayName);
 
           // Fetch prediction data if any prediction data element is configured
           if (predictionMedianId || predictionHighId || predictionLowId) {
@@ -163,7 +238,18 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
     predictionHighId,
     predictionLowId,
     engine,
+    orgUnits,
+    orgUnitLevel,
   ]);
+
+  // Set dashboard item title when historic data name is available
+  useEffect(() => {
+    if (historicDataName && props.setDashboardItemDetails) {
+      props.setDashboardItemDetails({
+        itemTitle: historicDataName,
+      });
+    }
+  }, [historicDataName, props]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -208,6 +294,12 @@ const ViewChart = ({ dashboardItemId, dashboardItemFilters }) => {
   }
 
   return null;
+};
+
+ViewChart.propTypes = {
+  dashboardItemId: PropTypes.string,
+  dashboardItemFilters: PropTypes.object,
+  setDashboardItemDetails: PropTypes.func,
 };
 
 export default ViewChart;
