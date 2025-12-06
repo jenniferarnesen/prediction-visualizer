@@ -3,6 +3,7 @@ import { Radio, TabBar, Tab, Button } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import DataSelector from "./DataSelector.jsx";
 import OrgUnitSelector from "./OrgUnitSelector/index.ts";
+import PeriodSelector from "./PeriodSelector.jsx";
 
 const dashboardItemsQuery = {
   dashboardItems: {
@@ -21,6 +22,7 @@ const EditChart = (props) => {
   const [activeTab, setActiveTab] = useState("data");
   const [orgUnits, setOrgUnits] = useState([]);
   const [orgUnitLevel, setOrgUnitLevel] = useState(undefined);
+  const [periodType, setPeriodType] = useState("weekly");
 
   const engine = useDataEngine();
   const {
@@ -44,6 +46,7 @@ const EditChart = (props) => {
           setPredictionLow(savedConfig.predictionLow || "");
           setOrgUnits(savedConfig.orgUnits || []);
           setOrgUnitLevel(savedConfig.orgUnitLevel || undefined);
+          setPeriodType(savedConfig.periodType || "weekly");
         }
       }
     }
@@ -70,6 +73,7 @@ const EditChart = (props) => {
           path: ou.path,
         }));
         itemConfig.orgUnitLevel = orgUnitLevel?.id;
+        itemConfig.periodType = periodType;
       }
 
       let existingDashboardItems = {};
@@ -122,8 +126,6 @@ const EditChart = (props) => {
     }
   };
 
-  console.log("activeTab:", activeTab);
-
   return (
     <div
       className="edit-chart-container"
@@ -169,6 +171,12 @@ const EditChart = (props) => {
             >
               Org units
             </Tab>
+            <Tab
+              selected={activeTab === "period"}
+              onClick={() => setActiveTab("period")}
+            >
+              Period
+            </Tab>
           </TabBar>
 
           {activeTab === "data" && (
@@ -190,6 +198,13 @@ const EditChart = (props) => {
               setOrgUnits={setOrgUnits}
               orgUnitLevel={orgUnitLevel}
               setOrgUnitLevel={setOrgUnitLevel}
+            />
+          )}
+
+          {activeTab === "period" && (
+            <PeriodSelector
+              periodType={periodType}
+              setPeriodType={setPeriodType}
             />
           )}
         </div>
