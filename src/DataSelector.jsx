@@ -32,7 +32,6 @@ const DataSelector = ({
   }
 
   const updateHistoricalData = ({ selected }) => {
-    console.log("jj selected historic data:", selected);
     setHistoricData(selected);
 
     // Find the selected data element to get its code
@@ -41,6 +40,10 @@ const DataSelector = ({
     );
 
     if (!selectedElement?.code) {
+      // Clear prediction fields if no code available
+      setPredictionHigh("");
+      setPredictionMedian("");
+      setPredictionLow("");
       return;
     }
 
@@ -51,16 +54,35 @@ const DataSelector = ({
         (de) => de.code && de.code.startsWith(baseCode)
       );
 
+    // Track which fields were found
+    let foundHigh = false;
+    let foundMedian = false;
+    let foundLow = false;
+
     // Auto-select prediction fields based on code patterns
     relatedElements?.forEach((de) => {
       if (de.code.includes("QUANTILE_HIGH")) {
         setPredictionHigh(de.id);
+        foundHigh = true;
       } else if (de.code.includes("QUANTILE_MEDIAN")) {
         setPredictionMedian(de.id);
+        foundMedian = true;
       } else if (de.code.includes("QUANTILE_LOW")) {
         setPredictionLow(de.id);
+        foundLow = true;
       }
     });
+
+    // Clear fields that didn't find a match
+    if (!foundHigh) {
+      setPredictionHigh("");
+    }
+    if (!foundMedian) {
+      setPredictionMedian("");
+    }
+    if (!foundLow) {
+      setPredictionLow("");
+    }
   };
 
   // Filter out prediction data elements from historical data selector
