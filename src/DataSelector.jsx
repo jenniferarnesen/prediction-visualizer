@@ -63,6 +63,17 @@ const DataSelector = ({
     });
   };
 
+  // Filter out prediction data elements from historical data selector
+  const historicalDataElements =
+    dataElementsData?.dataElements?.dataElements?.filter(
+      (de) =>
+        !de.code?.includes("QUANTILE_HIGH") &&
+        !de.code?.includes("QUANTILE_MID_HIGH") &&
+        !de.code?.includes("QUANTILE_MEDIAN") &&
+        !de.code?.includes("QUANTILE_MID_LOW") &&
+        !de.code?.includes("QUANTILE_LOW")
+    ) || [];
+
   return (
     <div>
       <h3>Data Selection</h3>
@@ -73,7 +84,7 @@ const DataSelector = ({
         onChange={updateHistoricalData}
         filterable
       >
-        {dataElementsData?.dataElements?.dataElements?.map((de) => (
+        {historicalDataElements.map((de) => (
           <SingleSelectOption
             key={de.id}
             label={de.displayName}
