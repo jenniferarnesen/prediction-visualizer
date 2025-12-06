@@ -21,8 +21,15 @@ const DataSelector = ({
   predictionLow,
   setPredictionLow,
 }) => {
-  const { error: dataElementsError, data: dataElementsData } =
-    useDataQuery(dataElementsQuery);
+  const {
+    error: dataElementsError,
+    data: dataElementsData,
+    loading,
+  } = useDataQuery(dataElementsQuery);
+
+  if (loading) {
+    return <div>Loading data elements...</div>;
+  }
 
   return (
     <div>
