@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import DataSelector from "./DataSelector.jsx";
 import OrgUnitSelector from "./OrgUnitSelector/index.ts";
 import PeriodSelector from "./PeriodSelector.jsx";
+import styles from "./EditChart.module.css";
 
 const dashboardItemsQuery = {
   dashboardItems: {
@@ -135,18 +136,8 @@ const EditChart = (props) => {
   };
 
   return (
-    <div
-      className="edit-chart-container"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        gap: "8px",
-        paddingBlockEnd: "8px",
-        marginInline: "8px",
-      }}
-    >
-      <div style={{ display: "flex", gap: "16px" }}>
+    <div className={styles.container}>
+      <div className={styles.radioGroup}>
         <Radio
           label="Set up custom chart"
           value="custom"
@@ -162,65 +153,66 @@ const EditChart = (props) => {
       </div>
 
       {chartType === "custom" && (
-        <div
-          className="custom-configurator"
-          style={{ flex: 1, overflow: "auto" }}
-        >
-          <TabBar>
-            <Tab
-              selected={activeTab === "data"}
-              onClick={() => setActiveTab("data")}
-            >
-              Data
-            </Tab>
-            <Tab
-              selected={activeTab === "orgunit"}
-              onClick={() => setActiveTab("orgunit")}
-            >
-              Org units
-            </Tab>
-            <Tab
-              selected={activeTab === "period"}
-              onClick={() => setActiveTab("period")}
-            >
-              Period
-            </Tab>
-          </TabBar>
+        <div className={styles.customConfigurator}>
+          <div className={styles.tabBarWrapper}>
+            <TabBar>
+              <Tab
+                selected={activeTab === "data"}
+                onClick={() => setActiveTab("data")}
+              >
+                Data
+              </Tab>
+              <Tab
+                selected={activeTab === "orgunit"}
+                onClick={() => setActiveTab("orgunit")}
+              >
+                Org units
+              </Tab>
+              <Tab
+                selected={activeTab === "period"}
+                onClick={() => setActiveTab("period")}
+              >
+                Period
+              </Tab>
+            </TabBar>
+          </div>
 
-          {activeTab === "data" && (
-            <DataSelector
-              historicData={historicData}
-              setHistoricData={setHistoricData}
-              predictionMedian={predictionMedian}
-              setPredictionMedian={setPredictionMedian}
-              predictionHigh={predictionHigh}
-              setPredictionHigh={setPredictionHigh}
-              predictionLow={predictionLow}
-              setPredictionLow={setPredictionLow}
-            />
-          )}
+          <div className={styles.tabContent}>
+            {activeTab === "data" && (
+              <DataSelector
+                historicData={historicData}
+                setHistoricData={setHistoricData}
+                predictionMedian={predictionMedian}
+                setPredictionMedian={setPredictionMedian}
+                predictionHigh={predictionHigh}
+                setPredictionHigh={setPredictionHigh}
+                predictionLow={predictionLow}
+                setPredictionLow={setPredictionLow}
+              />
+            )}
 
-          {activeTab === "orgunit" && (
-            <OrgUnitSelector
-              orgUnits={orgUnits}
-              setOrgUnits={setOrgUnits}
-              orgUnitLevel={orgUnitLevel}
-              setOrgUnitLevel={setOrgUnitLevel}
-            />
-          )}
+            {activeTab === "orgunit" && (
+              <OrgUnitSelector
+                orgUnits={orgUnits}
+                setOrgUnits={setOrgUnits}
+                orgUnitLevel={orgUnitLevel}
+                setOrgUnitLevel={setOrgUnitLevel}
+              />
+            )}
 
-          {activeTab === "period" && (
-            <PeriodSelector
-              periodType={periodType}
-              setPeriodType={setPeriodType}
-            />
-          )}
+            {activeTab === "period" && (
+              <PeriodSelector
+                periodType={periodType}
+                setPeriodType={setPeriodType}
+              />
+            )}
+          </div>
         </div>
       )}
 
-      {chartType !== "custom" && <div style={{ flex: 1 }} />}
+      {chartType !== "custom" && <div className={styles.spacer} />}
 
-      <div className={classes.buttons}>
+      <div>
         <Button
           onClick={saveConfigToDataStore}
           disabled={saveLoading || dashboardItemsLoading}
@@ -228,7 +220,9 @@ const EditChart = (props) => {
           {saveLoading ? "Saving..." : "Save configuration"}
         </Button>
         {saveError && (
-          <div style={{ color: "red" }}>Save Error: {saveError.message}</div>
+          <div className={styles.saveError}>
+            Save Error: {saveError.message}
+          </div>
         )}
       </div>
     </div>

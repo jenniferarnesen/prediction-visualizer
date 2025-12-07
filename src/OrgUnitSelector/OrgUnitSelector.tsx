@@ -1,9 +1,8 @@
 import React from "react";
-
-import styles from "./OrgUnitSelector.module.css";
 import OrgUnitTree from "./components/OrgUnitTree";
 import OrgUnitLevel from "./components/OrgUnitLevel";
 import { IOrgUnitLevel } from "./interfaces/orgUnit";
+import styles from "./OrgUnitSelector.module.css";
 
 interface OrgUnitSelectorProps {
   orgUnits: any[];
@@ -26,34 +25,20 @@ const OrgUnitSelector = ({
     }
   };
 
-  // checks that all selected orgUnits are on the same level
-  function orgUnitsSelectedIsValid() {
-    if (orgUnits.length === 0) {
-      return true;
-    }
-
-    const firstElement = (orgUnits[0] as any).path?.split("/").length;
-    return orgUnits.every(
-      (innerArray) =>
-        (innerArray as any).path?.split("/").length === firstElement
-    );
-  }
-
   return (
-    <>
-      <OrgUnitTree
-        selectedOrgUnits={orgUnits}
-        onChange={(selected: any) => {
-          onChangeOrgUnitTree(selected);
-        }}
-      />
-      {!orgUnitsSelectedIsValid() && (
-        <p className={styles.error}>
-          Only select organization units that are one the same level.
-        </p>
-      )}
-      <OrgUnitLevel orgUnitLevels={orgUnitLevel} onChange={setOrgUnitLevel} />
-    </>
+    <div className={styles.orgUnitContainer}>
+      <div className={styles.treeWrapper}>
+        <OrgUnitTree
+          selectedOrgUnits={orgUnits}
+          onChange={(selected: any) => {
+            onChangeOrgUnitTree(selected);
+          }}
+        />
+      </div>
+      <div className={styles.levelWrapper}>
+        <OrgUnitLevel orgUnitLevels={orgUnitLevel} onChange={setOrgUnitLevel} />
+      </div>
+    </div>
   );
 };
 

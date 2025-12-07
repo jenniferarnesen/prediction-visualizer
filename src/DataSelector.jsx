@@ -98,8 +98,6 @@ const DataSelector = ({
 
   return (
     <div>
-      <h3>Data Selection</h3>
-
       <SingleSelectField
         label="Historic data"
         selected={historicData}
