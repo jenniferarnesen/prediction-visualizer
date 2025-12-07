@@ -1,12 +1,18 @@
 import { useDataQuery } from "@dhis2/app-runtime";
-import { SingleSelectField, SingleSelectOption } from "@dhis2/ui";
+import {
+  SingleSelectField,
+  SingleSelectOption,
+  Input,
+  InputField,
+} from "@dhis2/ui";
 import styles from "./DataSelector.module.css";
 
 const dataElementsQuery = {
   dataElements: {
     resource: "dataElements",
     params: {
-      fields: "id,displayName,code",
+      fields:
+        "id,displayName,code,dataSetElements[dataSet[id,periodType,name]]",
       paging: false,
     },
   },
@@ -25,6 +31,7 @@ const DataSelector = ({
   setPredictionLow,
   predictionMidLow,
   setPredictionMidLow,
+  setPeriodType,
 }) => {
   const {
     error: dataElementsError,
@@ -39,10 +46,17 @@ const DataSelector = ({
   const updateHistoricalData = ({ selected }) => {
     setHistoricData(selected);
 
-    // Find the selected data element to get its code
+    // Find the selected data element to get its code and period type
     const selectedElement = dataElementsData?.dataElements?.dataElements?.find(
       (de) => de.id === selected
     );
+
+    // Set the period type from the data element's dataset
+    if (selectedElement?.dataSetElements?.[0]?.dataSet?.periodType) {
+      const dataSetPeriodType =
+        selectedElement.dataSetElements[0].dataSet.periodType.toLowerCase();
+      setPeriodType(dataSetPeriodType);
+    }
 
     if (!selectedElement?.code) {
       // Clear prediction fields if no code available
@@ -117,21 +131,38 @@ const DataSelector = ({
 
   return (
     <div className={styles.dataSelectContainer}>
-      <SingleSelectField
-        label="Historic data"
-        selected={historicData}
-        onChange={updateHistoricalData}
-        filterable
-        className={styles.selectField}
-      >
-        {historicalDataElements.map((de) => (
-          <SingleSelectOption
-            key={de.id}
-            label={de.displayName}
-            value={de.id}
+      <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
+        <div style={{ flex: 3 }}>
+          <SingleSelectField
+            label="Historic data"
+            selected={historicData}
+            onChange={updateHistoricalData}
+            filterable
+            className={styles.selectField}
+          >
+            {historicalDataElements.map((de) => (
+              <SingleSelectOption
+                key={de.id}
+                label={de.displayName}
+                value={de.id}
+              />
+            ))}
+          </SingleSelectField>
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <InputField
+            label="Data set period type"
+            value={
+              dataElementsData?.dataElements?.dataElements?.find(
+                (de) => de.id === historicData
+              )?.dataSetElements?.[0]?.dataSet?.periodType || ""
+            }
+            disabled
+            className={styles.selectField}
           />
-        ))}
-      </SingleSelectField>
+        </div>
+      </div>
 
       <SingleSelectField
         label="Prediction high"

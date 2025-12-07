@@ -3,7 +3,6 @@ import { Radio, TabBar, Tab, Button } from "@dhis2/ui";
 import { useState, useEffect } from "react";
 import DataSelector from "./DataSelector.jsx";
 import OrgUnitSelector from "./OrgUnitSelector/index.ts";
-import PeriodSelector from "./PeriodSelector.jsx";
 import styles from "./EditChart.module.css";
 
 const dashboardItemsQuery = {
@@ -25,7 +24,7 @@ const EditChart = (props) => {
   const [activeTab, setActiveTab] = useState("data");
   const [orgUnits, setOrgUnits] = useState([]);
   const [orgUnitLevel, setOrgUnitLevel] = useState(undefined);
-  const [periodType, setPeriodType] = useState("weekly");
+  const [periodType, setPeriodType] = useState("");
 
   // Set dashboard item title for edit mode
   useEffect(() => {
@@ -59,7 +58,7 @@ const EditChart = (props) => {
           setPredictionMidLow(savedConfig.predictionMidLow || "");
           setOrgUnits(savedConfig.orgUnits || []);
           setOrgUnitLevel({ id: savedConfig.orgUnitLevel } || undefined);
-          setPeriodType(savedConfig.periodType || "weekly");
+          setPeriodType(savedConfig.periodType || "");
         }
       }
     }
@@ -174,12 +173,6 @@ const EditChart = (props) => {
               >
                 Org units
               </Tab>
-              <Tab
-                selected={activeTab === "period"}
-                onClick={() => setActiveTab("period")}
-              >
-                Period
-              </Tab>
             </TabBar>
           </div>
 
@@ -198,6 +191,7 @@ const EditChart = (props) => {
                 setPredictionLow={setPredictionLow}
                 predictionMidLow={predictionMidLow}
                 setPredictionMidLow={setPredictionMidLow}
+                setPeriodType={setPeriodType}
               />
             )}
 
@@ -207,13 +201,6 @@ const EditChart = (props) => {
                 setOrgUnits={setOrgUnits}
                 orgUnitLevel={orgUnitLevel}
                 setOrgUnitLevel={setOrgUnitLevel}
-              />
-            )}
-
-            {activeTab === "period" && (
-              <PeriodSelector
-                periodType={periodType}
-                setPeriodType={setPeriodType}
               />
             )}
           </div>
