@@ -152,7 +152,7 @@ const DataSelector = ({
 
         <div style={{ flex: 1 }}>
           <InputField
-            label="Data set period type"
+            label="Period type"
             value={
               dataElementsData?.dataElements?.dataElements?.find(
                 (de) => de.id === historicData

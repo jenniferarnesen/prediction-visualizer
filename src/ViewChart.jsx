@@ -107,9 +107,7 @@ const getAnalyticsQuery = (
   if (orgUnits && orgUnits.length > 0) {
     ouFilters.push(...orgUnits.map((ou) => ou.id));
   }
-  // Default to LEVEL-2 if nothing specified
-  const ouDimension =
-    ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
+  const ouDimension = `ou:${ouFilters.join(";")}`;
 
   return {
     historicData: {
@@ -155,9 +153,7 @@ const getPredictionQuery = (
     ouFilters.push(...orgUnits.map((ou) => ou.id));
   }
 
-  // Default to LEVEL-2 if nothing specified
-  const ouDimension =
-    ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
+  const ouDimension = `ou:${ouFilters.join(";")}`;
 
   return {
     predictionData: {
@@ -185,6 +181,7 @@ const ViewChart = (props) => {
 
   // Get config to determine if we need to fetch analytics data
   const config = data?.dashboardItems?.[dashboardItemId];
+  console.log("jj config", dashboardItemId, config);
   const chartType = config?.chartType;
   const historicDataId = config?.historicData;
   const predictionMedianId = config?.predictionMedian;
@@ -194,7 +191,7 @@ const ViewChart = (props) => {
   const predictionMidLowId = config?.predictionMidLow;
   const orgUnits = config?.orgUnits;
   const orgUnitLevel = config?.orgUnitLevel;
-  const periodType = config?.periodType || "monthly";
+  const periodType = config?.periodType;
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -305,6 +302,16 @@ const ViewChart = (props) => {
   }
 
   if (chartType === "custom") {
+    // Check if org units are configured
+    if (!orgUnits?.length && !orgUnitLevel) {
+      return (
+        <div>
+          No organization units selected. Please configure organization units in
+          edit mode.
+        </div>
+      );
+    }
+
     if (analyticsLoading) {
       return <div>Loading analytics data...</div>;
     }
