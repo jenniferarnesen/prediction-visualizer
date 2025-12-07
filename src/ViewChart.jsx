@@ -99,7 +99,7 @@ const getAnalyticsQuery = (
       ? getPrevious18MonthsWeeks()
       : getPrevious18Months();
 
-  // Build org unit filter - can combine level and individual org units
+  // Build org unit dimension - can combine level and individual org units
   const ouFilters = [];
   if (orgUnitLevel) {
     ouFilters.push(`LEVEL-${orgUnitLevel}`);
@@ -108,15 +108,16 @@ const getAnalyticsQuery = (
     ouFilters.push(...orgUnits.map((ou) => ou.id));
   }
   // Default to LEVEL-2 if nothing specified
-  const ouFilter =
+  const ouDimension =
     ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
 
   return {
     historicData: {
       resource: "analytics",
       params: {
-        dimension: `dx:${historicDataId},pe:${periods.join(";")}`,
-        filter: ouFilter,
+        dimension: `dx:${historicDataId},pe:${periods.join(
+          ";"
+        )},${ouDimension}`,
         includeMetadataDetails: "true",
       },
     },
@@ -141,7 +142,7 @@ const getPredictionQuery = (
     predictionLowId,
   ].filter(Boolean);
 
-  // Build org unit filter - can combine level and individual org units
+  // Build org unit dimension - can combine level and individual org units
   const ouFilters = [];
   if (orgUnitLevel) {
     ouFilters.push(`LEVEL-${orgUnitLevel}`);
@@ -151,15 +152,16 @@ const getPredictionQuery = (
   }
 
   // Default to LEVEL-2 if nothing specified
-  const ouFilter =
+  const ouDimension =
     ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
 
   return {
     predictionData: {
       resource: "analytics",
       params: {
-        dimension: `dx:${dataElements.join(";")},pe:${periods.join(";")}`,
-        filter: ouFilter,
+        dimension: `dx:${dataElements.join(";")},pe:${periods.join(
+          ";"
+        )},${ouDimension}`,
         includeMetadataDetails: "true",
       },
     },
@@ -288,8 +290,6 @@ const ViewChart = (props) => {
       return <div>Error loading analytics data: {analyticsError.message}</div>;
     }
 
-    console.log("jj Analytics data:", analyticsData);
-    console.log("jj Prediction data:", predictionData);
     return (
       <CustomChart
         analyticsData={analyticsData}

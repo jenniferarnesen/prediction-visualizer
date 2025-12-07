@@ -11,7 +11,6 @@ const CustomChart = ({
   predictionLowId,
   periodType = "monthly",
 }) => {
-  console.log("jj custom chart", { analyticsData, predictionData });
   const chartRef = useRef(null);
 
   useEffect(() => {

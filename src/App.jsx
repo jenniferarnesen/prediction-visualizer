@@ -12,7 +12,6 @@ const query = {
 };
 
 const MyApp = () => {
-  console.log("jj MyApp rendered");
   const { error, loading, data } = useDataQuery(query);
 
   if (error) {
