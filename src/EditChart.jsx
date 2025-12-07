@@ -220,7 +220,7 @@ const EditChart = (props) => {
 
       {chartType !== "custom" && <div style={{ flex: 1 }} />}
 
-      <div>
+      <div className={classes.buttons}>
         <Button
           onClick={saveConfigToDataStore}
           disabled={saveLoading || dashboardItemsLoading}

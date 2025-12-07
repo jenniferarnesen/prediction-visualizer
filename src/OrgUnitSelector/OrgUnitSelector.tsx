@@ -18,7 +18,6 @@ const OrgUnitSelector = ({
   orgUnitLevel,
   setOrgUnitLevel,
 }: OrgUnitSelectorProps) => {
-  console.log("jj OrgUnitSelector orgUnits", orgUnits);
   const onChangeOrgUnitTree = (selected: any) => {
     if (selected.checked) {
       setOrgUnits([...orgUnits, selected]);
@@ -29,20 +28,15 @@ const OrgUnitSelector = ({
 
   // checks that all selected orgUnits are on the same level
   function orgUnitsSelectedIsValid() {
-    console.log;
     if (orgUnits.length === 0) {
       return true;
     }
 
-    console.log("jj orgUnits", orgUnits, orgUnits[0]?.path);
     const firstElement = (orgUnits[0] as any).path?.split("/").length;
-    console.log("firstElement:", firstElement);
-    const res = orgUnits.every((innerArray) => {
-      console.log("jj innerarray", innerArray);
-      return (innerArray as any).path?.split("/").length === firstElement;
-    });
-    console.log("jj res", res);
-    return res;
+    return orgUnits.every(
+      (innerArray) =>
+        (innerArray as any).path?.split("/").length === firstElement
+    );
   }
 
   return (
