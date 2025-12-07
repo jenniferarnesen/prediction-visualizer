@@ -54,7 +54,7 @@ const EditChart = (props) => {
           setPredictionHigh(savedConfig.predictionHigh || "");
           setPredictionLow(savedConfig.predictionLow || "");
           setOrgUnits(savedConfig.orgUnits || []);
-          setOrgUnitLevel(savedConfig.orgUnitLevel || undefined);
+          setOrgUnitLevel({ id: savedConfig.orgUnitLevel } || undefined);
           setPeriodType(savedConfig.periodType || "weekly");
         }
       }

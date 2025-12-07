@@ -177,6 +177,7 @@ const ViewChart = (props) => {
   const [analyticsError, setAnalyticsError] = useState(null);
   const [predictionData, setPredictionData] = useState(null);
   const [historicDataName, setHistoricDataName] = useState(null);
+  const [extractedOrgUnits, setExtractedOrgUnits] = useState([]);
 
   // Get config to determine if we need to fetch analytics data
   const config = data?.dashboardItems?.[dashboardItemId];
@@ -215,6 +216,14 @@ const ViewChart = (props) => {
               )
             ]?.name || "Historical Data";
           setHistoricDataName(displayName);
+
+          // Extract org units from metadata
+          const ouDimension = metaData.dimensions?.ou || [];
+          const ouItems = ouDimension.map((ouId) => ({
+            id: ouId,
+            displayName: metaData.items?.[ouId]?.name || ouId,
+          }));
+          setExtractedOrgUnits(ouItems);
 
           // Fetch prediction data if any prediction data element is configured
           if (predictionMedianId || predictionHighId || predictionLowId) {
@@ -298,6 +307,7 @@ const ViewChart = (props) => {
         predictionHighId={predictionHighId}
         predictionLowId={predictionLowId}
         periodType={periodType}
+        orgUnits={extractedOrgUnits}
       />
     );
   }

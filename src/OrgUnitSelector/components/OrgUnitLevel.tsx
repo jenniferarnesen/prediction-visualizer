@@ -11,6 +11,7 @@ interface OrgUnitLevelProps {
 }
 
 const OrgUnitLevel = ({ orgUnitLevels, onChange }: OrgUnitLevelProps) => {
+  console.log("jj OrgUnitLevel orgUnitLevels", orgUnitLevels);
   const { levels, loading, error } = useOrgUnitLevels();
 
   const onChangeLevel = (e: any) => {
@@ -21,6 +22,7 @@ const OrgUnitLevel = ({ orgUnitLevels, onChange }: OrgUnitLevelProps) => {
     onChange(newSelected);
   };
 
+  console.log("jj OUlevel setSelected to", orgUnitLevels?.id);
   return levels ? (
     <div className={styles.selectField}>
       <SingleSelectField

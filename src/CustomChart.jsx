@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import "highcharts/modules/data";
 import "highcharts/highcharts-more";
@@ -10,8 +10,12 @@ const CustomChart = ({
   predictionHighId,
   predictionLowId,
   periodType = "monthly",
+  orgUnits = [],
 }) => {
   const chartRef = useRef(null);
+  const [selectedOrgUnitId, setSelectedOrgUnitId] = useState(
+    orgUnits.length > 0 ? orgUnits[0].id : null
+  );
 
   useEffect(() => {
     if (!chartRef.current || !analyticsData?.historicData) {
@@ -22,6 +26,11 @@ const CustomChart = ({
     const rows = analyticsData.historicData.rows || [];
     const headers = analyticsData.historicData.headers || [];
     const metaData = analyticsData.historicData.metaData || {};
+
+    // Filter to only show data for the selected org unit
+    const filteredRows = selectedOrgUnitId
+      ? rows.filter((row) => row[2] === selectedOrgUnitId)
+      : rows;
 
     // Get the historic data element name from metadata
     const historicDataName =
@@ -63,7 +72,7 @@ const CustomChart = ({
     const valueIndex = headers.findIndex((h) => h.name === "value");
 
     // Transform rows into [timestamp, value] pairs and sort by period
-    const chartData = rows
+    const chartData = filteredRows
       .map((row) => {
         const period = row[peIndex];
         const value = parseFloat(row[valueIndex]);
@@ -86,7 +95,11 @@ const CustomChart = ({
       const predValueIndex = predHeaders.findIndex((h) => h.name === "value");
 
       return predRows
-        .filter((row) => row[predDxIndex] === dataElementId)
+        .filter(
+          (row) =>
+            row[predDxIndex] === dataElementId &&
+            (!selectedOrgUnitId || row[2] === selectedOrgUnitId)
+        )
         .map((row) => {
           const period = row[predPeIndex];
           const value = parseFloat(row[predValueIndex]);
@@ -202,9 +215,55 @@ const CustomChart = ({
     predictionHighId,
     predictionLowId,
     periodType,
+    orgUnits,
+    selectedOrgUnitId,
   ]);
 
-  return <div ref={chartRef} />;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        width: "100%",
+        gap: "16px",
+      }}
+    >
+      {orgUnits.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+            maxWidth: "150px",
+            paddingTop: "8px",
+            overflowX: "auto",
+          }}
+        >
+          {orgUnits.map((ou) => (
+            <div
+              key={ou.id}
+              onClick={() => setSelectedOrgUnitId(ou.id)}
+              style={{
+                padding: "8px 12px",
+                border: `1px solid ${
+                  selectedOrgUnitId === ou.id ? "#1e40af" : "#e5e7eb"
+                }`,
+                borderRadius: "4px",
+                fontSize: "14px",
+                cursor: "pointer",
+                backgroundColor:
+                  selectedOrgUnitId === ou.id ? "#eff6ff" : "transparent",
+                transition: "all 0.2s",
+              }}
+            >
+              {ou.displayName}
+            </div>
+          ))}
+        </div>
+      )}
+      <div ref={chartRef} style={{ flex: 1, minWidth: 0 }} />
+    </div>
+  );
 };
 
 export default CustomChart;
