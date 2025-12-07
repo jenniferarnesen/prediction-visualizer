@@ -88,8 +88,16 @@ const getPrevious12ToNext12MonthsWeeks = () => {
   return [...new Set(weeks)];
 };
 
-const getAnalyticsQuery = (historicDataId, orgUnits, orgUnitLevel) => {
-  const periods = getPrevious18Months();
+const getAnalyticsQuery = (
+  historicDataId,
+  orgUnits,
+  orgUnitLevel,
+  periodType = "monthly"
+) => {
+  const periods =
+    periodType === "weekly"
+      ? getPrevious18MonthsWeeks()
+      : getPrevious18Months();
 
   // Build org unit filter - can combine level and individual org units
   const ouFilters = [];
@@ -109,6 +117,7 @@ const getAnalyticsQuery = (historicDataId, orgUnits, orgUnitLevel) => {
       params: {
         dimension: `dx:${historicDataId},pe:${periods.join(";")}`,
         filter: ouFilter,
+        includeMetadataDetails: "true",
       },
     },
   };
@@ -119,10 +128,13 @@ const getPredictionQuery = (
   predictionHighId,
   predictionLowId,
   orgUnits,
-  orgUnitLevel
+  orgUnitLevel,
+  periodType = "monthly"
 ) => {
-  console.log("jj aa", { orgUnits, orgUnitLevel });
-  const periods = getPrevious12ToNext12Months();
+  const periods =
+    periodType === "weekly"
+      ? getPrevious12ToNext12MonthsWeeks()
+      : getPrevious12ToNext12Months();
   const dataElements = [
     predictionMedianId,
     predictionHighId,
@@ -134,16 +146,13 @@ const getPredictionQuery = (
   if (orgUnitLevel) {
     ouFilters.push(`LEVEL-${orgUnitLevel}`);
   }
-  // console.log("jj orgUnits in getPredictionQuery:", orgUnits);
   if (orgUnits && orgUnits.length > 0) {
     ouFilters.push(...orgUnits.map((ou) => ou.id));
   }
-  // console.log("jj ouFilters in getPredictionQuery:", ouFilters);
+
   // Default to LEVEL-2 if nothing specified
   const ouFilter =
     ouFilters.length > 0 ? `ou:${ouFilters.join(";")}` : "ou:LEVEL-2";
-
-  console.log("jj ouFilter", ouFilter);
 
   return {
     predictionData: {
@@ -151,14 +160,14 @@ const getPredictionQuery = (
       params: {
         dimension: `dx:${dataElements.join(";")},pe:${periods.join(";")}`,
         filter: ouFilter,
+        includeMetadataDetails: "true",
       },
     },
   };
 };
 
 const ViewChart = (props) => {
-  const { dashboardItemId, dashboardItemFilters, setDashboardItemDetails } =
-    props;
+  const { dashboardItemId } = props;
   const { loading, error, data } = useDataQuery(dashboardItemsQuery);
   const engine = useDataEngine();
   const [analyticsData, setAnalyticsData] = useState(null);
@@ -176,15 +185,7 @@ const ViewChart = (props) => {
   const predictionLowId = config?.predictionLow;
   const orgUnits = config?.orgUnits;
   const orgUnitLevel = config?.orgUnitLevel;
-
-  // console.log("ViewChart config:", {
-  //   config,
-  //   chartType,
-  //   historicDataId,
-  //   predictionMedianId,
-  //   predictionHighId,
-  //   predictionLowId,
-  // });
+  const periodType = config?.periodType || "monthly";
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -194,7 +195,12 @@ const ViewChart = (props) => {
         try {
           // Fetch historic data
           const historicResult = await engine.query(
-            getAnalyticsQuery(historicDataId, orgUnits, orgUnitLevel)
+            getAnalyticsQuery(
+              historicDataId,
+              orgUnits,
+              orgUnitLevel,
+              periodType
+            )
           );
           setAnalyticsData(historicResult);
 
@@ -216,7 +222,8 @@ const ViewChart = (props) => {
                 predictionHighId,
                 predictionLowId,
                 orgUnits,
-                orgUnitLevel
+                orgUnitLevel,
+                periodType
               )
             );
             setPredictionData(predictionResult);
@@ -240,6 +247,7 @@ const ViewChart = (props) => {
     engine,
     orgUnits,
     orgUnitLevel,
+    periodType,
   ]);
 
   // Set dashboard item title when historic data name is available
@@ -280,8 +288,8 @@ const ViewChart = (props) => {
       return <div>Error loading analytics data: {analyticsError.message}</div>;
     }
 
-    console.log("Analytics data:", analyticsData);
-    console.log("Prediction data:", predictionData);
+    console.log("jj Analytics data:", analyticsData);
+    console.log("jj Prediction data:", predictionData);
     return (
       <CustomChart
         analyticsData={analyticsData}
@@ -289,6 +297,7 @@ const ViewChart = (props) => {
         predictionMedianId={predictionMedianId}
         predictionHighId={predictionHighId}
         predictionLowId={predictionLowId}
+        periodType={periodType}
       />
     );
   }

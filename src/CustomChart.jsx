@@ -9,7 +9,9 @@ const CustomChart = ({
   predictionMedianId,
   predictionHighId,
   predictionLowId,
+  periodType = "monthly",
 }) => {
+  console.log("jj custom chart", { analyticsData, predictionData });
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -32,6 +34,31 @@ const CustomChart = ({
 
     const chartTitle = `${historicDataName} and predictions`;
 
+    // Helper function to parse period string based on type
+    const parsePeriod = (period) => {
+      if (periodType === "weekly") {
+        // Format: YYYYWW or YYYYWWW (e.g., "2024W1" or "2024W01")
+        const year = parseInt(period.substring(0, 4));
+        const week = parseInt(period.substring(5)); // Parse from after 'W' to end
+
+        // Calculate date from ISO week
+        // January 4th is always in week 1
+        const jan4 = new Date(Date.UTC(year, 0, 4));
+        const weekStart = new Date(jan4);
+        weekStart.setUTCDate(
+          jan4.getUTCDate() - ((jan4.getUTCDay() + 6) % 7) + (week - 1) * 7
+        );
+
+        return weekStart.getTime();
+      } else {
+        // Format: YYYYMM (e.g., "202401")
+        const year = parseInt(period.substring(0, 4));
+        const month = parseInt(period.substring(4, 6)) - 1; // JS months are 0-indexed
+
+        return Date.UTC(year, month, 1);
+      }
+    };
+
     // Find the indices for period and value
     const peIndex = headers.findIndex((h) => h.name === "pe");
     const valueIndex = headers.findIndex((h) => h.name === "value");
@@ -39,14 +66,10 @@ const CustomChart = ({
     // Transform rows into [timestamp, value] pairs and sort by period
     const chartData = rows
       .map((row) => {
-        const period = row[peIndex]; // Format: YYYYMM
+        const period = row[peIndex];
         const value = parseFloat(row[valueIndex]);
 
-        // Parse period into date
-        const year = parseInt(period.substring(0, 4));
-        const month = parseInt(period.substring(4, 6)) - 1; // JS months are 0-indexed
-
-        return [Date.UTC(year, month, 1), value];
+        return [parsePeriod(period), value];
       })
       .sort((a, b) => a[0] - b[0]); // Sort by timestamp
 
@@ -69,10 +92,7 @@ const CustomChart = ({
           const period = row[predPeIndex];
           const value = parseFloat(row[predValueIndex]);
 
-          const year = parseInt(period.substring(0, 4));
-          const month = parseInt(period.substring(4, 6)) - 1;
-
-          return [Date.UTC(year, month, 1), value];
+          return [parsePeriod(period), value];
         })
         .sort((a, b) => a[0] - b[0]);
     };
@@ -169,7 +189,7 @@ const CustomChart = ({
       tooltip: {
         crosshairs: true,
         shared: true,
-        xDateFormat: "%B %Y",
+        xDateFormat: periodType === "weekly" ? "Week %W, %Y" : "%B %Y",
       },
       legend: {
         enabled: true,
@@ -182,6 +202,7 @@ const CustomChart = ({
     predictionMedianId,
     predictionHighId,
     predictionLowId,
+    periodType,
   ]);
 
   return <div ref={chartRef} style={{ width: "100%", height: "400px" }} />;
