@@ -127,7 +127,9 @@ const getAnalyticsQuery = (
 const getPredictionQuery = (
   predictionMedianId,
   predictionHighId,
+  predictionMidHighId,
   predictionLowId,
+  predictionMidLowId,
   orgUnits,
   orgUnitLevel,
   periodType = "monthly"
@@ -139,7 +141,9 @@ const getPredictionQuery = (
   const dataElements = [
     predictionMedianId,
     predictionHighId,
+    predictionMidHighId,
     predictionLowId,
+    predictionMidLowId,
   ].filter(Boolean);
 
   // Build org unit dimension - can combine level and individual org units
@@ -185,7 +189,9 @@ const ViewChart = (props) => {
   const historicDataId = config?.historicData;
   const predictionMedianId = config?.predictionMedian;
   const predictionHighId = config?.predictionHigh;
+  const predictionMidHighId = config?.predictionMidHigh;
   const predictionLowId = config?.predictionLow;
+  const predictionMidLowId = config?.predictionMidLow;
   const orgUnits = config?.orgUnits;
   const orgUnitLevel = config?.orgUnitLevel;
   const periodType = config?.periodType || "monthly";
@@ -226,12 +232,20 @@ const ViewChart = (props) => {
           setExtractedOrgUnits(ouItems);
 
           // Fetch prediction data if any prediction data element is configured
-          if (predictionMedianId || predictionHighId || predictionLowId) {
+          if (
+            predictionMedianId ||
+            predictionHighId ||
+            predictionMidHighId ||
+            predictionLowId ||
+            predictionMidLowId
+          ) {
             const predictionResult = await engine.query(
               getPredictionQuery(
                 predictionMedianId,
                 predictionHighId,
+                predictionMidHighId,
                 predictionLowId,
+                predictionMidLowId,
                 orgUnits,
                 orgUnitLevel,
                 periodType
@@ -305,7 +319,9 @@ const ViewChart = (props) => {
         predictionData={predictionData}
         predictionMedianId={predictionMedianId}
         predictionHighId={predictionHighId}
+        predictionMidHighId={predictionMidHighId}
         predictionLowId={predictionLowId}
+        predictionMidLowId={predictionMidLowId}
         periodType={periodType}
         orgUnits={extractedOrgUnits}
       />

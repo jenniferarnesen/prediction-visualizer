@@ -2,13 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import "highcharts/modules/data";
 import "highcharts/highcharts-more";
+import { Menu, MenuItem } from "@dhis2/ui";
 
 const CustomChart = ({
   analyticsData,
   predictionData,
   predictionMedianId,
   predictionHighId,
+  predictionMidHighId,
   predictionLowId,
+  predictionMidLowId,
   periodType = "monthly",
   orgUnits = [],
 }) => {
@@ -40,7 +43,13 @@ const CustomChart = ({
         )
       ]?.name || "Historical Data";
 
-    const chartTitle = `${historicDataName} and predictions`;
+    // Get the selected org unit name
+    const selectedOrgUnit = orgUnits.find((ou) => ou.id === selectedOrgUnitId);
+    const orgUnitName = selectedOrgUnit?.displayName || "";
+
+    const chartTitle = orgUnitName
+      ? `${historicDataName} and predictions - ${orgUnitName}`
+      : `${historicDataName} and predictions`;
 
     // Helper function to parse period string based on type
     const parsePeriod = (period) => {
@@ -112,7 +121,9 @@ const CustomChart = ({
     // Get data for each prediction series
     const medianData = getPredictionSeriesData(predictionMedianId);
     const highData = getPredictionSeriesData(predictionHighId);
+    const midHighData = getPredictionSeriesData(predictionMidHighId);
     const lowData = getPredictionSeriesData(predictionLowId);
+    const midLowData = getPredictionSeriesData(predictionMidLowId);
 
     // Combine high and low data into arearange format
     const areaRangeData = [];
@@ -127,6 +138,23 @@ const CustomChart = ({
         const lowValue = lowMap.get(timestamp);
         if (lowValue !== undefined) {
           areaRangeData.push([timestamp, lowValue, highValue]);
+        }
+      });
+    }
+
+    // Combine mid-high and mid-low data into arearange format
+    const midAreaRangeData = [];
+    if (midHighData.length > 0 && midLowData.length > 0) {
+      // Create a map of mid-low values by timestamp for easy lookup
+      const midLowMap = new Map(
+        midLowData.map(([timestamp, value]) => [timestamp, value])
+      );
+
+      // Combine mid-high and mid-low values for matching timestamps
+      midHighData.forEach(([timestamp, midHighValue]) => {
+        const midLowValue = midLowMap.get(timestamp);
+        if (midLowValue !== undefined) {
+          midAreaRangeData.push([timestamp, midLowValue, midHighValue]);
         }
       });
     }
@@ -163,6 +191,22 @@ const CustomChart = ({
       });
     }
 
+    // Add arearange for prediction mid-high/mid-low if data is available
+    if (midAreaRangeData.length > 0) {
+      series.push({
+        name: "Prediction Range (Mid-Low-Mid-High)",
+        type: "arearange",
+        data: midAreaRangeData,
+        color: "rgba(100, 149, 237, 0.5)",
+        fillOpacity: 0.5,
+        lineWidth: 0,
+        marker: {
+          enabled: false,
+        },
+        zIndex: 1,
+      });
+    }
+
     // Add prediction median series if data is available
     if (medianData.length > 0) {
       series.push({
@@ -173,9 +217,10 @@ const CustomChart = ({
         lineWidth: 2,
         marker: {
           enabled: true,
-          radius: 4,
+          symbol: "circle",
+          radius: 3,
         },
-        zIndex: 1,
+        zIndex: 3,
       });
     }
 
@@ -213,7 +258,9 @@ const CustomChart = ({
     predictionData,
     predictionMedianId,
     predictionHighId,
+    predictionMidHighId,
     predictionLowId,
+    predictionMidLowId,
     periodType,
     orgUnits,
     selectedOrgUnitId,
@@ -229,36 +276,17 @@ const CustomChart = ({
       }}
     >
       {orgUnits.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-            maxWidth: "150px",
-            paddingTop: "8px",
-            overflowX: "auto",
-          }}
-        >
-          {orgUnits.map((ou) => (
-            <div
-              key={ou.id}
-              onClick={() => setSelectedOrgUnitId(ou.id)}
-              style={{
-                padding: "8px 12px",
-                border: `1px solid ${
-                  selectedOrgUnitId === ou.id ? "#1e40af" : "#e5e7eb"
-                }`,
-                borderRadius: "4px",
-                fontSize: "14px",
-                cursor: "pointer",
-                backgroundColor:
-                  selectedOrgUnitId === ou.id ? "#eff6ff" : "transparent",
-                transition: "all 0.2s",
-              }}
-            >
-              {ou.displayName}
-            </div>
-          ))}
+        <div style={{ maxWidth: "150px", overflowX: "auto" }}>
+          <Menu dense>
+            {orgUnits.map((ou) => (
+              <MenuItem
+                key={ou.id}
+                active={selectedOrgUnitId === ou.id}
+                label={ou.displayName}
+                onClick={() => setSelectedOrgUnitId(ou.id)}
+              />
+            ))}
+          </Menu>
         </div>
       )}
       <div ref={chartRef} style={{ flex: 1, minWidth: 0 }} />

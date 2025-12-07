@@ -17,7 +17,9 @@ const EditChart = (props) => {
   const [historicData, setHistoricData] = useState("");
   const [predictionMedian, setPredictionMedian] = useState("");
   const [predictionHigh, setPredictionHigh] = useState("");
+  const [predictionMidHigh, setPredictionMidHigh] = useState("");
   const [predictionLow, setPredictionLow] = useState("");
+  const [predictionMidLow, setPredictionMidLow] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState(null);
   const [activeTab, setActiveTab] = useState("data");
@@ -52,7 +54,9 @@ const EditChart = (props) => {
           setHistoricData(savedConfig.historicData || "");
           setPredictionMedian(savedConfig.predictionMedian || "");
           setPredictionHigh(savedConfig.predictionHigh || "");
+          setPredictionMidHigh(savedConfig.predictionMidHigh || "");
           setPredictionLow(savedConfig.predictionLow || "");
+          setPredictionMidLow(savedConfig.predictionMidLow || "");
           setOrgUnits(savedConfig.orgUnits || []);
           setOrgUnitLevel({ id: savedConfig.orgUnitLevel } || undefined);
           setPeriodType(savedConfig.periodType || "weekly");
@@ -76,7 +80,9 @@ const EditChart = (props) => {
         itemConfig.historicData = historicData;
         itemConfig.predictionMedian = predictionMedian;
         itemConfig.predictionHigh = predictionHigh;
+        itemConfig.predictionMidHigh = predictionMidHigh;
         itemConfig.predictionLow = predictionLow;
+        itemConfig.predictionMidLow = predictionMidLow;
         itemConfig.orgUnits = orgUnits.map((ou) => ({
           id: ou.id,
           path: ou.path,
@@ -186,8 +192,12 @@ const EditChart = (props) => {
                 setPredictionMedian={setPredictionMedian}
                 predictionHigh={predictionHigh}
                 setPredictionHigh={setPredictionHigh}
+                predictionMidHigh={predictionMidHigh}
+                setPredictionMidHigh={setPredictionMidHigh}
                 predictionLow={predictionLow}
                 setPredictionLow={setPredictionLow}
+                predictionMidLow={predictionMidLow}
+                setPredictionMidLow={setPredictionMidLow}
               />
             )}
 
@@ -216,6 +226,8 @@ const EditChart = (props) => {
         <Button
           onClick={saveConfigToDataStore}
           disabled={saveLoading || dashboardItemsLoading}
+          small
+          primary
         >
           {saveLoading ? "Saving..." : "Save configuration"}
         </Button>

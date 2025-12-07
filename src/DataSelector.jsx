@@ -1,5 +1,6 @@
 import { useDataQuery } from "@dhis2/app-runtime";
 import { SingleSelectField, SingleSelectOption } from "@dhis2/ui";
+import styles from "./DataSelector.module.css";
 
 const dataElementsQuery = {
   dataElements: {
@@ -18,8 +19,12 @@ const DataSelector = ({
   setPredictionMedian,
   predictionHigh,
   setPredictionHigh,
+  predictionMidHigh,
+  setPredictionMidHigh,
   predictionLow,
   setPredictionLow,
+  predictionMidLow,
+  setPredictionMidLow,
 }) => {
   const {
     error: dataElementsError,
@@ -56,7 +61,9 @@ const DataSelector = ({
 
     // Track which fields were found
     let foundHigh = false;
+    let foundMidHigh = false;
     let foundMedian = false;
+    let foundMidLow = false;
     let foundLow = false;
 
     // Auto-select prediction fields based on code patterns
@@ -64,9 +71,15 @@ const DataSelector = ({
       if (de.code.includes("QUANTILE_HIGH")) {
         setPredictionHigh(de.id);
         foundHigh = true;
+      } else if (de.code.includes("QUANTILE_MID_HIGH")) {
+        setPredictionMidHigh(de.id);
+        foundMidHigh = true;
       } else if (de.code.includes("QUANTILE_MEDIAN")) {
         setPredictionMedian(de.id);
         foundMedian = true;
+      } else if (de.code.includes("QUANTILE_MID_LOW")) {
+        setPredictionMidLow(de.id);
+        foundMidLow = true;
       } else if (de.code.includes("QUANTILE_LOW")) {
         setPredictionLow(de.id);
         foundLow = true;
@@ -77,8 +90,14 @@ const DataSelector = ({
     if (!foundHigh) {
       setPredictionHigh("");
     }
+    if (!foundMidHigh) {
+      setPredictionMidHigh("");
+    }
     if (!foundMedian) {
       setPredictionMedian("");
+    }
+    if (!foundMidLow) {
+      setPredictionMidLow("");
     }
     if (!foundLow) {
       setPredictionLow("");
@@ -103,23 +122,9 @@ const DataSelector = ({
         selected={historicData}
         onChange={updateHistoricalData}
         filterable
+        className={styles.selectField}
       >
         {historicalDataElements.map((de) => (
-          <SingleSelectOption
-            key={de.id}
-            label={de.displayName}
-            value={de.id}
-          />
-        ))}
-      </SingleSelectField>
-
-      <SingleSelectField
-        label="Prediction median"
-        selected={predictionMedian}
-        onChange={({ selected }) => setPredictionMedian(selected)}
-        filterable
-      >
-        {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
             key={de.id}
             label={de.displayName}
@@ -133,6 +138,7 @@ const DataSelector = ({
         selected={predictionHigh}
         onChange={({ selected }) => setPredictionHigh(selected)}
         filterable
+        className={styles.selectField}
       >
         {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
@@ -144,10 +150,56 @@ const DataSelector = ({
       </SingleSelectField>
 
       <SingleSelectField
+        label="Prediction mid high"
+        selected={predictionMidHigh}
+        onChange={({ selected }) => setPredictionMidHigh(selected)}
+        filterable
+        className={styles.selectField}
+      >
+        {dataElementsData?.dataElements?.dataElements?.map((de) => (
+          <SingleSelectOption
+            key={de.id}
+            label={de.displayName}
+            value={de.id}
+          />
+        ))}
+      </SingleSelectField>
+      <SingleSelectField
+        label="Prediction median"
+        selected={predictionMedian}
+        onChange={({ selected }) => setPredictionMedian(selected)}
+        filterable
+        className={styles.selectField}
+      >
+        {dataElementsData?.dataElements?.dataElements?.map((de) => (
+          <SingleSelectOption
+            key={de.id}
+            label={de.displayName}
+            value={de.id}
+          />
+        ))}
+      </SingleSelectField>
+      <SingleSelectField
+        label="Prediction mid low"
+        selected={predictionMidLow}
+        onChange={({ selected }) => setPredictionMidLow(selected)}
+        filterable
+        className={styles.selectField}
+      >
+        {dataElementsData?.dataElements?.dataElements?.map((de) => (
+          <SingleSelectOption
+            key={de.id}
+            label={de.displayName}
+            value={de.id}
+          />
+        ))}
+      </SingleSelectField>
+      <SingleSelectField
         label="Prediction low"
         selected={predictionLow}
         onChange={({ selected }) => setPredictionLow(selected)}
         filterable
+        className={styles.selectField}
       >
         {dataElementsData?.dataElements?.dataElements?.map((de) => (
           <SingleSelectOption
