@@ -116,7 +116,7 @@ const DataSelector = ({
     ) || [];
 
   return (
-    <div>
+    <div className={styles.dataSelectContainer}>
       <SingleSelectField
         label="Historic data"
         selected={historicData}

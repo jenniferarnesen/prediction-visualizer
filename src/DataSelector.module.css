@@ -1,3 +1,8 @@
+.dataSelectContainer {
+  margin-top: 16px;
+  width: 80%;
+}
+
 .selectField {
   margin-top: 8px !important;
 }
