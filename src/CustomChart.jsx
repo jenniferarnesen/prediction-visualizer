@@ -246,7 +246,34 @@ const CustomChart = ({
       tooltip: {
         crosshairs: true,
         shared: true,
-        xDateFormat: periodType === "weekly" ? "Week %W, %Y" : "%B %Y",
+        ...(periodType === "weekly"
+          ? {
+              formatter: function () {
+                const date = new Date(this.x);
+
+                // Calculate ISO week number
+                const tempDate = new Date(date.getTime());
+                tempDate.setHours(0, 0, 0, 0);
+                // Set to nearest Thursday (current date + 4 - current day number, making Sunday = 7)
+                tempDate.setDate(
+                  tempDate.getDate() + 4 - (tempDate.getDay() || 7)
+                );
+                // Get first day of year
+                const yearStart = new Date(tempDate.getFullYear(), 0, 1);
+                // Calculate ISO week number
+                const weekNum = Math.ceil(
+                  ((tempDate - yearStart) / 86400000 + 1) / 7
+                );
+                const isoYear = tempDate.getFullYear();
+
+                let tooltip = `<b>Week ${weekNum}, ${isoYear}</b><br/>`;
+                this.points.forEach((point) => {
+                  tooltip += `<span style="color:${point.color}">\u25CF</span> ${point.series.name}: <b>${point.y}</b><br/>`;
+                });
+                return tooltip;
+              },
+            }
+          : { xDateFormat: "%B %Y" }),
       },
       legend: {
         enabled: true,
