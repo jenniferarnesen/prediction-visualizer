@@ -82,7 +82,6 @@ const DataSelector = ({
 
     // Auto-select prediction fields based on code patterns
     relatedElements?.forEach((de) => {
-      console.log("jj de code", de.code);
       if (de.code.includes("QUANTILE_HIGH") || de.code.includes("CHAP_HIGH")) {
         setPredictionHigh(de.id);
         foundHigh = true;

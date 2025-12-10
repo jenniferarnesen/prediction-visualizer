@@ -181,7 +181,6 @@ const ViewChart = (props) => {
 
   // Get config to determine if we need to fetch analytics data
   const config = data?.dashboardItems?.[dashboardItemId];
-  console.log("jj config", dashboardItemId, config);
   const chartType = config?.chartType;
   const historicDataId = config?.historicData;
   const predictionMedianId = config?.predictionMedian;
