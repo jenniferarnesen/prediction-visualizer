@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-12-10T10:17:56.372Z\n"
-"PO-Revision-Date: 2025-12-10T10:17:56.372Z\n"
+"POT-Creation-Date: 2025-12-10T12:26:53.172Z\n"
+"PO-Revision-Date: 2025-12-10T12:26:53.172Z\n"
 
 msgid "ERROR"
 msgstr "ERROR"
@@ -22,3 +22,11 @@ msgstr "Organisation unit level"
 
 msgid "Organisation unit level to import data to"
 msgstr "Organisation unit level to import data to"
+
+msgctxt "Application title"
+msgid "__MANIFEST_APP_TITLE"
+msgstr "prediction-visualizer"
+
+msgctxt "Application description"
+msgid "__MANIFEST_APP_DESCRIPTION"
+msgstr ""
