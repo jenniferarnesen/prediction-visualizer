@@ -11,12 +11,12 @@ const dashboardItemsQuery = {
   },
 };
 
-// Helper function to get the previous 18 months in YYYYMM format
-const getPrevious18Months = () => {
+// Helper function to get the previous 24 months (2 years) in YYYYMM format
+const getPrevious24Months = () => {
   const months = [];
   const now = new Date();
 
-  for (let i = 17; i >= 0; i--) {
+  for (let i = 23; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -54,13 +54,13 @@ const getISOWeek = (date) => {
   return 1 + Math.ceil((firstThursday - target) / 604800000);
 };
 
-// Helper function to get the previous 18 months worth of weeks (~78 weeks) in YYYYWWW format
-const getPrevious18MonthsWeeks = () => {
+// Helper function to get the previous 24 months worth of weeks (~104 weeks) in YYYYWWW format
+const getPrevious24MonthsWeeks = () => {
   const weeks = [];
   const now = new Date();
 
-  // Calculate approximately 78 weeks back (18 months * 4.33 weeks/month)
-  for (let i = 77; i >= 0; i--) {
+  // Calculate approximately 104 weeks back (24 months * 4.33 weeks/month)
+  for (let i = 103; i >= 0; i--) {
     const date = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
     const year = date.getFullYear();
     const week = getISOWeek(date);
@@ -96,8 +96,8 @@ const getAnalyticsQuery = (
 ) => {
   const periods =
     periodType === "weekly"
-      ? getPrevious18MonthsWeeks()
-      : getPrevious18Months();
+      ? getPrevious24MonthsWeeks()
+      : getPrevious24Months();
 
   // Build org unit dimension - can combine level and individual org units
   const ouFilters = [];
